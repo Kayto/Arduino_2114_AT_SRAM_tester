@@ -185,7 +185,7 @@ void runFullTest() {
   for (byte pattern = 0; pattern < 16; pattern++) {
     Serial.print(F("Test pattern "));
     printBinary(pattern);
-    Serial.println();
+    Serial.print(" ");
     
     for (int addr = 0; addr < 1024; addr++) {
       writeData(addr, pattern, VERBOSE);
@@ -218,7 +218,7 @@ void runFullTest() {
         if ((addr + 1) % 1000 == 0) Serial.println();
       }
     }
-    Serial.println();
+    //Serial.println();
   }
 
   Serial.println(F("Test alternating patterns..."));
@@ -408,85 +408,106 @@ void userTest() {
       if (currentAddress > 0x3FF) {
         Serial.println(F("Max addr. (0x3FF). Stop."));
       }
-    } else if (choice == 2) {
-      Serial.println(); // Add newline for clarity
-      Serial.print(F("Start addr (000-3FF): "));
-      delay(10); // Give Serial buffer time to transmit
-      while (Serial.available() > 0) Serial.read(); // Clear any leftover data
-      char startAddressBuf[8];
-      int i = 0;
-      while (true) {
-        while (Serial.available() == 0);
-        char c = Serial.read();
-        if (c == '\n' || c == '\r') break;
-        if (i < 7) startAddressBuf[i++] = c;
-      }
-      startAddressBuf[i] = '\0';
-      Serial.print(F("Start: '"));
-      Serial.print(startAddressBuf);
-      Serial.println(F("'"));
+} else if (choice == 2) {
+  Serial.println(); // Add newline for clarity
+  Serial.print(F("Start addr (000-3FF): "));
+  delay(10); // Give Serial buffer time to transmit
+  while (Serial.available() > 0) Serial.read(); // Clear any leftover data
+  char startAddressBuf[8];
+  int i = 0;
+  while (true) {
+    while (Serial.available() == 0);
+    char c = Serial.read();
+    if (c == '\n' || c == '\r') break;
+    if (i < 7) startAddressBuf[i++] = c;
+  }
+  startAddressBuf[i] = '\0';
+  Serial.print(F("Start: '"));
+  Serial.print(startAddressBuf);
+  Serial.println(F("'"));
 
-      int startAddress = parseHexInput(startAddressBuf, 8);
+  int startAddress = parseHexInput(startAddressBuf, 8);
 
-      if (startAddress < 0 || startAddress > 0x3FF) {
-        Serial.println(F("Invalid start! Use 000-3FF."));
-        continue;
-      }
+  if (startAddress < 0 || startAddress > 0x3FF) {
+    Serial.println(F("Invalid start! Use 000-3FF."));
+    continue;
+  }
 
-      Serial.println(); // Add newline for clarity
-      Serial.print(F("End addr ("));
-      if (startAddress < 0x10) Serial.print("0");
-      if (startAddress < 0x100) Serial.print("0");
-      Serial.print(startAddress, HEX);
-      Serial.print(F("-3FF): "));
-      delay(10); // Give Serial buffer time to transmit
-      while (Serial.available() > 0) Serial.read(); // Clear any leftover data
-      char endAddressBuf[8];
-      i = 0;
-      while (true) {
-        while (Serial.available() == 0);
-        char c = Serial.read();
-        if (c == '\n' || c == '\r') break;
-        if (i < 7) endAddressBuf[i++] = c;
-      }
-      endAddressBuf[i] = '\0';
-      Serial.print(F("End: '"));
-      Serial.print(endAddressBuf);
-      Serial.println(F("'"));
+  Serial.println(); // Add newline for clarity
+  Serial.print(F("End addr ("));
+  if (startAddress < 0x10) Serial.print("0");
+  if (startAddress < 0x100) Serial.print("0");
+  Serial.print(startAddress, HEX);
+  Serial.print(F("-3FF): "));
+  delay(10); // Give Serial buffer time to transmit
+  while (Serial.available() > 0) Serial.read(); // Clear any leftover data
+  char endAddressBuf[8];
+  i = 0;
+  while (true) {
+    while (Serial.available() == 0);
+    char c = Serial.read();
+    if (c == '\n' || c == '\r') break;
+    if (i < 7) endAddressBuf[i++] = c;
+  }
+  endAddressBuf[i] = '\0';
+  Serial.print(F("End: '"));
+  Serial.print(endAddressBuf);
+  Serial.println(F("'"));
 
-      int endAddress = parseHexInput(endAddressBuf, 8);
+  int endAddress = parseHexInput(endAddressBuf, 8);
 
-      if (endAddress < startAddress || endAddress > 0x3FF) {
-        Serial.print(F("Invalid end! Use "));
-        if (startAddress < 0x10) Serial.print("0");
-        if (startAddress < 0x100) Serial.print("0");
-        Serial.print(startAddress, HEX);
-        Serial.println(F("-3FF."));
-        continue;
-      }
+  if (endAddress < startAddress || endAddress > 0x3FF) {
+    Serial.print(F("Invalid end! Use "));
+    if (startAddress < 0x10) Serial.print("0");
+    if (startAddress < 0x100) Serial.print("0");
+    Serial.print(startAddress, HEX);
+    Serial.println(F("-3FF."));
+    continue;
+  }
 
-      Serial.print(F("Read 0x"));
-      if (startAddress < 0x10) Serial.print("0");
-      if (startAddress < 0x100) Serial.print("0");
-      Serial.print(startAddress, HEX);
-      Serial.print(F(" to 0x"));
-      if (endAddress < 0x10) Serial.print("0");
-      if (endAddress < 0x100) Serial.print("0");
-      Serial.println(endAddress, HEX);
+  Serial.println();
+  // Print single header row for 0x00 to 0x0F
+  Serial.print(F("     ")); // Align with address column (e.g., "000: ")
+  for (int offset = 0; offset < 16; offset++) {
+    Serial.print(F(""));
+    if (offset < 0x10) Serial.print("0");
+    Serial.print(offset, HEX);
+    Serial.print(" | ");
+  }
+  Serial.println();
+ //               |    00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 | 0A | 0B | 0C | 0D | 0E | 0F | 
+  Serial.println("--------+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+");
+  // Process addresses in chunks of 16
+  int chunkSize = 16;
+  // Start from the chunk containing startAddress
+  int firstChunkStart = startAddress & ~0xF; // Round down to nearest multiple of 16
+  for (int chunkStart = firstChunkStart; chunkStart <= endAddress; chunkStart += chunkSize) {
+    int chunkEnd = min(chunkStart + chunkSize - 1, endAddress);
 
-      int addr = startAddress;
-      while (addr <= endAddress) {
-        for (int i = 0; i < 16 && addr <= endAddress; i++, addr++) {
+    // Skip chunks before startAddress or after endAddress
+    if (chunkEnd < startAddress || chunkStart > endAddress) continue;
+
+    // Print one data row for this chunk, labeled with chunkStart
+    if (chunkStart <= endAddress && chunkEnd >= startAddress) {
+      // Print chunk's base address
+      if (chunkStart < 0x10) Serial.print("0");
+      if (chunkStart < 0x100) Serial.print("0");
+      Serial.print(chunkStart, HEX);
+      Serial.print(F(": "));
+
+      // Print data for addresses in this chunk
+      for (int addr = chunkStart; addr <= chunkEnd; addr++) {
+        if (addr >= startAddress && addr <= endAddress) {
           byte data = readData(addr, false);
-          if (addr < 0x10) Serial.print("0");
-          if (addr < 0x100) Serial.print("0");
-          Serial.print(addr, HEX);
-          Serial.print(F(": "));
-          Serial.print(data, HEX);
-          if (addr < endAddress) Serial.print(" ");
+          Serial.print(data, HEX); // Print data in hex (0-F)
+          Serial.print("  | "); // Two spaces to align with header
+        } else {
+          Serial.print("    "); // Placeholder for alignment
         }
-        Serial.println();
       }
+      Serial.println();
+    }
+  }
     } else if (choice == 3) { // New option: Fill memory with user-defined value
       Serial.println(); // Add newline for clarity
       Serial.print(F("Fill val (0-F): "));
