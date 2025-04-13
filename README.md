@@ -132,15 +132,6 @@ This prints each write and read in detail, including data pin states and decoded
 This project is licensed under the MIT License.  
 See the full license text in source code header.
 
-```
-MIT License
-
-Copyright (c) 2025 kayto
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-...
-```
-
 ---
 
 ## Acknowledgements
