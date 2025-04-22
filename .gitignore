@@ -1,0 +1,13 @@
+# Ignore all .7z, .zip, and .txt files
+*.7z
+*.zip
+*.txt
+
+# Ignore the 'comp' directory
+comp/
+kicad/
+
+# Ignore the 'archive' directory specifically inside 'code'
+code/archive/
+# Exclude compile.txt
+compile.txt
