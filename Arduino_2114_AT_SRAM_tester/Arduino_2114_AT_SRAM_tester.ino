@@ -48,8 +48,8 @@
  * - /CE (pin 8) is tied to GND, keeping the chip always enabled.
  * - Add *external* 10kΩ pull-down resistors from data pins (Arduino 10-13) to GND.
  *   i didn't bother but YMVV.
- * - Note delays implemented for 2114 SRAM timing: 50µs address setup, 500µs read cycle,
- *   250µs write pulse, 500µs total write cycle.
+ * - Note delays implemented for 2114 SRAM timing: 2µs address setup, 2µs read cycle,
+ *   250µs write pulse, 4µs total write cycle.
  * - Verbose logging: VERBOSE = true to log all writes and reads.
  * - Added start menu to choose full test or user tests.
  * - User tests to allow separate write/read operations with hex input.
@@ -86,7 +86,7 @@ void setAddressBits(int address) {
   for (int i = 0; i < 10; i++) {
     digitalWrite(addressPins[i], bitRead(address, i));
   }
-  delayMicroseconds(50); // Address setup time (20ns required, use 50µs)
+  delayMicroseconds(2); // Address setup time (20ns required)
 }
 
 void logAddressBits(int address) {
@@ -113,7 +113,7 @@ void writeData(int address, byte data, bool verbose = false) {
   digitalWrite(WE, LOW);
   setDataBits(data);
   if (verbose && VERBOSE) {
-    Serial.print(F("Write 0x"));
+    Serial.print(F("  Write 0x"));
     if (address < 0x10) Serial.print("0");
     if (address < 0x100) Serial.print("0");
     Serial.print(address, HEX);
@@ -126,23 +126,23 @@ void writeData(int address, byte data, bool verbose = false) {
     }
     Serial.println(F(")"));
   }
-  delayMicroseconds(250); // Write pulse width (200ns required, use 250µs)
+  delayMicroseconds(2); // Write pulse width (200ns required)
   digitalWrite(WE, HIGH);
   setDataBits(0);
-  delayMicroseconds(200); // Total write cycle 500µs
+  delayMicroseconds(2); // Total write cycle 4µs
 }
 
 byte readData(int address, bool verbose = false) {
   digitalWrite(WE, HIGH);
   setDataPinsInput();
   setAddressBits(address);
-  delayMicroseconds(450); // Access time (450ns required, use 500µs total)
+  delayMicroseconds(5); // Access time (450ns required)
   byte result = 0;
   for (int i = 0; i < 4; i++) {
     bitWrite(result, 3 - i, digitalRead(dataPins[i]));
   }
   if (verbose) {
-    Serial.print(F("Read 0x"));
+    Serial.print(F("  Read 0x"));
     if (address < 0x10) Serial.print("0");
     if (address < 0x100) Serial.print("0");
     Serial.print(address, HEX);
@@ -202,7 +202,7 @@ void runFullTest() {
         writeData(addr, pattern, true);
         byte reread = readData(addr, true);
         logAddressBits(addr);
-        Serial.print(F("Error at 0x"));
+        Serial.print(F("** Error at 0x"));
         if (addr < 0x10) Serial.print("0");
         if (addr < 0x100) Serial.print("0");
         Serial.print(addr, HEX);
@@ -238,7 +238,7 @@ void runFullTest() {
       writeData(addr, expected, true);
       byte reread = readData(addr, true);
       logAddressBits(addr);
-      Serial.print(F("Alternating error 0x"));
+      Serial.print(F("** Alternating error 0x"));
       if (addr < 0x10) Serial.print("0");
       if (addr < 0x100) Serial.print("0");
       Serial.print(addr, HEX);
@@ -582,7 +582,7 @@ void setup() {
   pinMode(WE, OUTPUT);
   digitalWrite(WE, HIGH);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(500);
   Serial.println();
   Serial.println(F("2114 SRAM Tester by kayto@github.com"));
