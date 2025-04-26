@@ -4,7 +4,7 @@
 An **Arduino UNO R3-based static RAM tester** for testing **2114 SRAM chips**.  
 This tool allows you to verify the function of vintage 1K × 4-bit 2114 SRAM ICs through an automated full test or manual user-guided interface.
 
-Created by [kayto@github.com](https://github.com/kayto)  
+Adapted from code by Carsten Skjerk 
 SPDX-License-Identifier: MIT
 
 ---
