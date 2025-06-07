@@ -21,6 +21,8 @@ SPDX-License-Identifier: MIT
 
 ## Project Versions
 
+![SRAM Tester Hardware Example](images/20250607_200055.jpg)
+
 ### 1. Automated Version (`Arduino_2114_AT_SRAM_tester_auto.ino`)
 - **Runs all tests automatically on power-up/reset.**
 - No user interaction required.
@@ -50,6 +52,8 @@ SPDX-License-Identifier: MIT
 - Use this version for hardware that follows Skjerk’s reference pinout, or for shield/PCB compatibility.
 
 > **Note:** Serial output (as used in the automated and interactive versions) cannot be supported on the original Skjerk hardware. This is because Arduino pins D0 and D1 are required for the SRAM address bus, but these pins are also used for Serial RX/TX. Any attempt to use Serial will conflict with address signaling, impacting reliable communication and memory testing. For this reason, all diagnostics and results are provided by the LED only.
+
+
 
 ### Automated vs Interactive Version: Test Comparison
 
