@@ -1,4 +1,3 @@
-
 # 2114_AT_SRAM_TESTER
 
 An **Arduino UNO R3-based static RAM tester** for testing **2114 SRAM chips**.  
@@ -20,12 +19,34 @@ SPDX-License-Identifier: MIT
 
 ---
 
+## Project Versions
+
+### 1. Automated Version (`Arduino_2114_AT_SRAM_tester_auto.ino`)
+- **Runs all tests automatically on power-up/reset.**
+- No user interaction required.
+- Pass/fail result is indicated on an external LED (A5):
+  - Pass: slow blink 3×, then steady ON
+  - Fail: fast blink forever
+- Serial output for diagnostics and error reporting (optional).
+- Use this version for quick, hands-off chip testing.
+
+### 2. Interactive Version (`Arduino_2114_AT_SRAM_tester.ino`)
+- **Interactive serial menu for user-driven tests and memory operations.**
+- Full test: all 4-bit patterns, alternating patterns, error reporting.
+- User test: manual write/read/fill operations with hex input.
+- Fill routine: set all memory to a value (0xF default or user-defined).
+- Serial output for test progress, error reporting, and data display.
+- Use this version for detailed manual control and diagnostics.
+
+---
+
 ## Requirements
 
 - Arduino UNO R3
 - 2114 SRAM chip (18-pin DIP)
 - Jumper wires (color-coded recommended)
 - (Optional) 4× 10kΩ pull-down resistors on data lines (D10–D13)
+- **LED (plus 330Ω resistor) for pass/fail indicator (connect to A5 and GND)**
 
 ---
 
@@ -34,17 +55,19 @@ SPDX-License-Identifier: MIT
 ```
 2114 SRAM Pin Diagram (18-pin DIP, top-down view):
 
-       +------------------+
-A6     |1       +       18| Vcc (+5V, red)
-A5     |2               17| A7 (D7, brown)
-A4     |3               16| A8 (D8, grey)
-A3     |4               15| A9 (D9, purple)
-A0     |5    2114 SRAM  14| I/O1 (D13, orange)
-A1     |6               13| I/O2 (D12, yellow)
-A2     |7               12| I/O3 (D11, green)
-/CE    |8               11| I/O4 (D10, blue)
-GND    |9               10| /WE (A0/D14, orange)
-       +------------------+
+                         +------------------+
+(D6 red)             A6  |1       +       18| Vcc    (+5V, red)
+(D5 orange)          A5  |2               17| A7     (D7, brown)
+(D4 yellow)          A4  |3               16| A8     (D8, grey)
+(D3 green)           A3  |4               15| A9     (D9, purple)
+(D2 grey)            A0  |5    2114 SRAM  14| I/O1   (D13, orange)
+(A1 / D15 purple)    A1  |6               13| I/O2   (D12, yellow)
+(A2 / D16 blue)      A2  |7               12| I/O3   (D11, green)
+(GND)                /CE |8               11| I/O4   (D10, blue)
+(GND)                GND |9               10| /WE    (A0/D14, orange)
+                         +------------------+
+
+(LED, A5)         LED INDICATOR: Connect LED (with series resistor, e.g. 330Ω) from A5 to GND
 ```
 
 | 2114 Pin | Function   | Arduino Pin       |
@@ -67,15 +90,16 @@ GND    |9               10| /WE (A0/D14, orange)
 | 16       | A8         | D8 (grey)         |
 | 17       | A7         | D7 (brown)        |
 | 18       | Vcc        | +5V (red)         |
+| -        | LED IND    | A5 → LED → GND    |
 
 *Wire colors are suggestions to help organize connections.*
 
 ---
 
-## Serial Monitor Usage
+## Serial Monitor Usage (Interactive Version)
 
 1. Upload the sketch to the Arduino UNO R3.
-2. Open the Serial Monitor at **9600 baud**, line ending: **Newline**.
+2. Open the Serial Monitor at **115200 baud**, line ending: **Newline**.
 3. The startup routine checks for the presence of a 2114 SRAM chip.
 4. You'll be presented with the following menu:
 

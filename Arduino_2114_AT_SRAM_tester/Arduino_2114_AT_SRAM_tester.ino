@@ -10,17 +10,17 @@
  *
  * 2114 SRAM Pin Diagram (18-pin DIP, top-down view):
  * 
- *        +------------------+
- * A6     |1       +       18| Vcc (+5V, red)
- * A5     |2               17| A7 (D7, brown)
- * A4     |3               16| A8 (D8, grey)
- * A3     |4               15| A9 (D9, purple)
- * A0     |5    2114 SRAM  14| I/O1 (D13, orange)
- * A1     |6               13| I/O2 (D12, yellow)
- * A2     |7               12| I/O3 (D11, green)
- * /CE    |8               11| I/O4 (D10, blue)
- * GND    |9               10| /WE (A0/D14, orange)
- *        +------------------+
+ *                  +------------------+
+ * (D6, red)     A6 |1       +       18| Vcc (+5V, red)
+ * (D5, orange)  A5 |2               17| A7 (D7, brown)
+ * (D4, yellow)  A4 |3               16| A8 (D8, grey)
+ * (D3, green)   A3 |4               15| A9 (D9, purple)
+ * (D2, grey)    A0 |5    2114 SRAM  14| I/O1 (D13, orange)
+ * (A1, purple)  A1 |6               13| I/O2 (D12, yellow)
+ * (A2, blue)    A2 |7               12| I/O3 (D11, green)
+ * (GND, orange) /CE|8               11| I/O4 (D10, blue)
+ * (GND, yellow) GND|9               10| /WE (A0/D14, orange)
+ *                  +------------------+
  *
  *  2114 Pin | Function   | Connection
  *  ---------+------------+----------------------------------
