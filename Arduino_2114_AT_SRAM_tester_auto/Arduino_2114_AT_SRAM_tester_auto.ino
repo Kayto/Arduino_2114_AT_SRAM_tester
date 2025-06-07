@@ -171,136 +171,18 @@ void printBinary(byte data) {
 }
 
 void fillMemory(byte value) {
-  Serial.print(F("Fill mem. 0x"));
-  Serial.println(value, HEX);
+  if (VERBOSE) {
+    Serial.print(F("Fill mem. 0x"));
+    Serial.println(value, HEX);
+  }
   for (int addr = 0; addr < 1024; addr++) {
     writeData(addr, value, false);
-    if ((addr + 1) % 100 == 0) {
+    if (VERBOSE && ((addr + 1) % 100 == 0)) {
       Serial.print(".");
       if ((addr + 1) % 1000 == 0) Serial.println();
     }
   }
-  Serial.println(F("\nFill done."));
-}
-
-void runFullTest() {
-  int errorCount = 0;
-  bool allSame = true;
-  byte firstData = 0;
-
-  for (byte pattern = 0; pattern < 16; pattern++) {
-    Serial.print(F("Test pattern "));
-    printBinary(pattern);
-    Serial.print(" ");
-    
-    for (int addr = 0; addr < 1024; addr++) {
-      writeData(addr, pattern, VERBOSE);
-      byte data = readData(addr, VERBOSE);
-      
-      if (addr == 0 && pattern == 0) {
-        firstData = data;
-      } else if (data != firstData) {
-        allSame = false;
-      }
-      
-      if (data != pattern) {
-        errorCount++;
-        writeData(addr, pattern, true);
-        byte reread = readData(addr, true);
-        logAddressBits(addr);
-        Serial.print(F("** Error at 0x"));
-        if (addr < 0x10) Serial.print("0");
-        if (addr < 0x100) Serial.print("0");
-        Serial.print(addr, HEX);
-        Serial.print(F(" - Got: "));
-        printBinary(reread);
-        Serial.print(F(" Exp: "));
-        printBinary(pattern);
-        Serial.println();
-      }
-
-      if ((addr + 1) % 100 == 0) {
-        Serial.print(".");
-        if ((addr + 1) % 1000 == 0) Serial.println();
-      }
-    }
-    //Serial.println();
-  }
-
-  Serial.println(F("Test alternating patterns..."));
-  for (int addr = 0; addr < 1024; addr++) {
-    writeData(addr, (addr % 2) ? 0x5 : 0xA, VERBOSE);
-    if ((addr + 1) % 100 == 0) {
-      Serial.print(".");
-      if ((addr + 1) % 1000 == 0) Serial.println();
-    }
-  }
-  Serial.println();
-  for (int addr = 0; addr < 1024; addr++) {
-    byte expected = (addr % 2) ? 0x5 : 0xA;
-    byte data = readData(addr, VERBOSE);
-    if (data != expected) {
-      errorCount++;
-      writeData(addr, expected, true);
-      byte reread = readData(addr, true);
-      logAddressBits(addr);
-      Serial.print(F("** Alternating error 0x"));
-      if (addr < 0x10) Serial.print("0");
-      if (addr < 0x100) Serial.print("0");
-      Serial.print(addr, HEX);
-      Serial.print(F(" - Got: "));
-      printBinary(reread);
-      Serial.print(F(" Exp: "));
-      printBinary(expected);
-      Serial.println();
-    }
-    if ((addr + 1) % 100 == 0) {
-      Serial.print(".");
-      if ((addr + 1) % 1000 == 0) Serial.println();
-    }
-  }
-  Serial.println();
-
-  if (allSame) {
-    Serial.println(F("Warning: All same value. SRAM faulty?"));
-  }
-  
-  Serial.print(F("Test done, "));
-  Serial.print(errorCount);
-  Serial.println(F(" errs."));
-
-  fillMemory(0xF);
-}
-
-int parseHexInput(char* input, int maxLen) {
-  int start = 0;
-  int end = strlen(input) - 1;
-  while (start <= end && (input[start] == ' ' || input[start] == '\r' || input[start] == '\n')) start++;
-  while (end >= start && (input[end] == ' ' || input[end] == '\r' || input[end] == '\n')) end--;
-  input[end + 1] = '\0';
-  memmove(input, input + start, end - start + 2);
-
-  char *endPtr;
-  int value = strtol(input, &endPtr, 16);
-  if (*endPtr != '\0') {
-    Serial.print(F("Invalid hex: '"));
-    Serial.print(input);
-    Serial.println(F("'"));
-    return -1;
-  }
-  return value;
-}
-
-char readPrintableChar() {
-  char c;
-  do {
-    while (Serial.available() == 0);
-    c = Serial.read();
-    while (Serial.available() > 0) {
-      Serial.read();
-    }
-  } while (c == '\n' || c == '\r');
-  return c;
+  if (VERBOSE) Serial.println(F("\nFill done."));
 }
 
 // Simple 10-bit LFSR for pseudo-random pattern generation
@@ -326,11 +208,17 @@ uint8_t lfsr10_next(LFSR10 *lfsr) {
 
 // Automated test runner
 void automatedTest() {
+  if (VERBOSE) {
+    Serial.println(F("Automated SRAM test started (verbose mode)..."));
+  } else {
+    Serial.println(F("SRAM test in progress..."));
+  }
   int errorCount = 0;
   bool allSame = true;
   byte firstData = 0;
 
   // 1. All patterns 0x0 to 0xF (valid for 4-bit SRAM)
+  if (VERBOSE) Serial.println(F("Test: All 4-bit patterns (0x0 to 0xF)"));
   for (byte pattern = 0; pattern < 16; pattern++) {
     for (int addr = 0; addr < 1024; addr++) {
       writeData(addr, pattern & 0xF, false); // Mask to 4 bits
@@ -339,37 +227,92 @@ void automatedTest() {
       byte data = readData(addr, false) & 0xF; // Mask to 4 bits
       if (addr == 0 && pattern == 0) firstData = data;
       else if (data != firstData) allSame = false;
-      if (data != (pattern & 0xF)) errorCount++;
+      if (data != (pattern & 0xF)) {
+        errorCount++;
+        if (VERBOSE) {
+          Serial.print(F("** Error at 0x"));
+          if (addr < 0x10) Serial.print("0");
+          if (addr < 0x100) Serial.print("0");
+          Serial.print(addr, HEX);
+          Serial.print(F(" - Got: "));
+          printBinary(data);
+          Serial.print(F(" Exp: "));
+          printBinary(pattern & 0xF);
+          Serial.println();
+        }
+      }
     }
   }
 
   // 2. Alternating patterns (0xA/0x5, both 4-bit)
+  if (VERBOSE) Serial.println(F("Test: Alternating patterns (0xA/0x5)"));
   for (int addr = 0; addr < 1024; addr++) {
     writeData(addr, ((addr % 2) ? 0x5 : 0xA) & 0xF, false);
   }
   for (int addr = 0; addr < 1024; addr++) {
     byte expected = ((addr % 2) ? 0x5 : 0xA) & 0xF;
     byte data = readData(addr, false) & 0xF;
-    if (data != expected) errorCount++;
+    if (data != expected) {
+      errorCount++;
+      if (VERBOSE) {
+        Serial.print(F("** Alternating error 0x"));
+        if (addr < 0x10) Serial.print("0");
+        if (addr < 0x100) Serial.print("0");
+        Serial.print(addr, HEX);
+        Serial.print(F(" - Got: "));
+        printBinary(data);
+        Serial.print(F(" Exp: "));
+        printBinary(expected);
+        Serial.println();
+      }
+    }
   }
 
   // 3. Walking 1s and 0s (4 bits only)
+  if (VERBOSE) Serial.println(F("Test: Walking 1s and 0s (4 bits)"));
   for (byte bit = 0; bit < 4; bit++) {
     byte pattern = (1 << bit) & 0xF;
     for (int addr = 0; addr < 1024; addr++) writeData(addr, pattern, false);
     for (int addr = 0; addr < 1024; addr++) {
       byte data = readData(addr, false) & 0xF;
-      if (data != pattern) errorCount++;
+      if (data != pattern) {
+        errorCount++;
+        if (VERBOSE) {
+          Serial.print(F("** Walking 1s error 0x"));
+          if (addr < 0x10) Serial.print("0");
+          if (addr < 0x100) Serial.print("0");
+          Serial.print(addr, HEX);
+          Serial.print(F(" - Got: "));
+          printBinary(data);
+          Serial.print(F(" Exp: "));
+          printBinary(pattern);
+          Serial.println();
+        }
+      }
     }
     pattern = (~(1 << bit)) & 0xF;
     for (int addr = 0; addr < 1024; addr++) writeData(addr, pattern, false);
     for (int addr = 0; addr < 1024; addr++) {
       byte data = readData(addr, false) & 0xF;
-      if (data != pattern) errorCount++;
+      if (data != pattern) {
+        errorCount++;
+        if (VERBOSE) {
+          Serial.print(F("** Walking 0s error 0x"));
+          if (addr < 0x10) Serial.print("0");
+          if (addr < 0x100) Serial.print("0");
+          Serial.print(addr, HEX);
+          Serial.print(F(" - Got: "));
+          printBinary(data);
+          Serial.print(F(" Exp: "));
+          printBinary(pattern);
+          Serial.println();
+        }
+      }
     }
   }
 
   // 4. Pseudo-random pattern (LFSR, 4 bits only)
+  if (VERBOSE) Serial.println(F("Test: Pseudo-random pattern (LFSR, 4 bits)"));
   LFSR10 lfsr;
   lfsr10_init(&lfsr, 0x1A3); // Arbitrary nonzero seed
   for (int addr = 0; addr < 1024; addr++) {
@@ -380,25 +323,48 @@ void automatedTest() {
   for (int addr = 0; addr < 1024; addr++) {
     byte expected = lfsr10_next(&lfsr) & 0xF;
     byte data = readData(addr, false) & 0xF;
-    if (data != expected) errorCount++;
+    if (data != expected) {
+      errorCount++;
+      if (VERBOSE) {
+        Serial.print(F("** LFSR error 0x"));
+        if (addr < 0x10) Serial.print("0");
+        if (addr < 0x100) Serial.print("0");
+        Serial.print(addr, HEX);
+        Serial.print(F(" - Got: "));
+        printBinary(data);
+        Serial.print(F(" Exp: "));
+        printBinary(expected);
+        Serial.println();
+      }
+    }
   }
 
   // 5. All same value check
-  if (allSame) errorCount += 1024; // Force fail if all same
+  if (allSame && VERBOSE) {
+    Serial.println(F("Warning: All same value. SRAM faulty?"));
+  }
 
-  // Fill memory with 0xF at end
+  if (VERBOSE) {
+    Serial.print(F("Test done, "));
+    Serial.print(errorCount);
+    Serial.println(F(" errs."));
+  }
+
+  if (VERBOSE) Serial.println(F("Filling memory with 0xF..."));
   fillMemory(0xF);
 
   // LED indication
   if (errorCount == 0) {
-    // Pass: blink LED slowly 3x, then ON
     for (int i = 0; i < 3; i++) {
       digitalWrite(LED_PIN, HIGH); delay(300);
       digitalWrite(LED_PIN, LOW); delay(300);
     }
     digitalWrite(LED_PIN, HIGH); // Steady ON
+    Serial.println(F("All tests passed!"));
   } else {
-    // Fail: fast blink LED forever
+    Serial.print(F("Test failed with "));
+    Serial.print(errorCount);
+    Serial.println(F(" errors."));
     while (1) {
       digitalWrite(LED_PIN, HIGH); delay(100);
       digitalWrite(LED_PIN, LOW); delay(100);
@@ -418,10 +384,10 @@ void setup() {
   delay(500);
   Serial.println();
   Serial.println(F("2114 SRAM Automated Tester by kayto@github.com"));
-  Serial.println(F("Check SRAM..."));
+  Serial.println(F("Check SRAM Present..."));
   writeData(0, 0xA, false);
   setDataPinsInput();
-  byte data = readData(0, false);
+  byte data = readData(0, false) & 0xF; // Mask to 4 bits for 2114 SRAM
   if (data == 0x0 || data == 0xF) {
     Serial.println(F("Error: SRAM not detected."));
     // Fail LED
@@ -430,7 +396,7 @@ void setup() {
       digitalWrite(LED_PIN, LOW); delay(100);
     }
   } else {
-    Serial.println(F("SRAM OK."));
+    Serial.println(F("SRAM Detected OK."));
   }
 
   automatedTest();

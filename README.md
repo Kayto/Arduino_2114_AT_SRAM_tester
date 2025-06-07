@@ -38,6 +38,25 @@ SPDX-License-Identifier: MIT
 - Serial output for test progress, error reporting, and data display.
 - Use this version for detailed manual control and diagnostics.
 
+### Automated vs Interactive Version: Test Comparison
+
+| Feature/Test Type         | Automated Version (`_auto.ino`) | Interactive Version (`.ino`) |
+|--------------------------|:--------------------------------:|:----------------------------:|
+| **Runs on power-up**     | Yes                              | No (user menu)               |
+| **User interaction**     | None                             | Menu-driven                  |
+| **All 4-bit patterns**   | Yes                              | Yes                          |
+| **Alternating patterns** | Yes                              | Yes                          |
+| **Walking 1s/0s**        | Yes                              | Yes                          |
+| **Pseudo-random (LFSR)** | Yes                              | No                           |
+| **Manual read/write**    | No                               | Yes                          |
+| **Manual fill**          | No                               | Yes                          |
+| **Error reporting**      | Serial (auto, verbose error option)    | Serial (interactive, verbose error option)|
+| **LED pass/fail indicator**        | Yes                              | No                          |
+| **Memory fill at end**   | Yes (0xF)                        | Yes (user or 0xF)            |
+
+- The **Automated Version** runs a fully automated sequence including all 4-bit patterns, alternating patterns, walking 1s/0s, and a pseudo-random (LFSR) test. It is designed for quick, hands-off chip validation.
+- The **Interactive Version** allows the user to select and run tests, including manual read/write/fill operations. It is best for diagnostics and manual control. It does not include the pseudo-random (LFSR) test or the LED indicator.
+
 ---
 
 ## Requirements
