@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
 
 ## Project Versions
 
-![SRAM Tester Hardware Example]([images/20250607_200055.jpg](https://github.com/Kayto/Arduino_2114_AT_SRAM_tester/blob/main/images/20250607_200055.jpg))
+![SRAM Tester Hardware Example](images/20250607_200055.jpg)
 
 ### 1. Automated Version (`Arduino_2114_AT_SRAM_tester_auto.ino`)
 - **Runs all tests automatically on power-up/reset.**
