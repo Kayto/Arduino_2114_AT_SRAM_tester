@@ -38,6 +38,19 @@ SPDX-License-Identifier: MIT
 - Serial output for test progress, error reporting, and data display.
 - Use this version for detailed manual control and diagnostics.
 
+### 3. Skjerk-Compatible Headless Version (`Arduino_2114_AT_SRAM_tester_SKJERK.ino`)
+- **Fully automated, LED-only, no Serial or user interaction.**
+- Pin mapping and logic are 100% compatible with Carsten Skjerk’s original tester and hardware shields/PCBs.
+- Tests all 4-bit data patterns (0x0–0xF), alternating patterns (0xA/0x5), walking 1s/0s, and pseudo-random (LFSR) patterns.
+- Pass/fail result is indicated on an external LED (A5):
+  - Pass: slow blink 3×, then steady ON
+  - Fail: fast blink forever
+
+- No Serial output, menus, or diagnostics—headless operation only.
+- Use this version for hardware that follows Skjerk’s reference pinout, or for shield/PCB compatibility.
+
+> **Note:** Serial output (as used in the automated and interactive versions) cannot be supported on the original Skjerk hardware. This is because Arduino pins D0 and D1 are required for the SRAM address bus, but these pins are also used for Serial RX/TX. Any attempt to use Serial will conflict with address signaling, impacting reliable communication and memory testing. For this reason, all diagnostics and results are provided by the LED only.
+
 ### Automated vs Interactive Version: Test Comparison
 
 | Feature/Test Type         | Automated Version (`_auto.ino`) | Interactive Version (`.ino`) |
@@ -56,6 +69,7 @@ SPDX-License-Identifier: MIT
 
 - The **Automated Version** runs a fully automated sequence including all 4-bit patterns, alternating patterns, walking 1s/0s, and a pseudo-random (LFSR) test. It is designed for quick, hands-off chip validation.
 - The **Interactive Version** allows the user to select and run tests, including manual read/write/fill operations. It is best for diagnostics and manual control. It does not include the pseudo-random (LFSR) test or the LED indicator.
+- The **Skjerk-Compatible Headless Version** is intended for use with hardware that matches the original Skjerk pinout. It offers fully automated testing with LED indicators for pass/fail status and is compatible with shields and PCBs designed by Carsten Skjerk.
 
 ---
 
